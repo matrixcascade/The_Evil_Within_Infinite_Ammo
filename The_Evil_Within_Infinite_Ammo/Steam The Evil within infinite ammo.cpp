@@ -10,6 +10,10 @@ static unsigned char const bin[]={0x29,0x41,0x10,0x8b,0x41,0x10,0x85,0xD2,0x79,0
 static unsigned char const crkbin[]={0x90,0x90,0x90};
 static unsigned char const crked[]={0x90,0x90,0x90,0x8b,0x41,0x10,0x85,0xD2,0x79,0x1E,0x48,0x8B,0x51};
 
+static unsigned char const bin1[] = { 0x89,0x51,0x10,0x45,0x84,0xC0,0x75,0x37,0x8B,0x41,0x18,0x85,0xC0 };
+static unsigned char const crkbin1[] = { 0x90,0x90,0x90 };
+static unsigned char const crked1[] = { 0x90,0x90,0x90,0x45,0x84,0xC0,0x75,0x37,0x8B,0x41,0x18,0x85,0xC0 };
+
 int main()
 {
 	printf("The Evil Within (all versions) Infinite Ammo Cracker\nYou need start the game before crack it.\n\npress any key to execute crack-process.\n");
@@ -55,7 +59,7 @@ int main()
 	}
 	DWORD cbNeeded = 0;
 	TCHAR szModName[MAX_PATH];
-
+	BOOL Cracked[2] = { 0 };
 	HMODULE hMods[256]={0};
 
 	EnumProcessModulesEx(hProcess, hMods, sizeof(hMods), &cbNeeded,LIST_MODULES_64BIT);
@@ -72,22 +76,41 @@ int main()
 			{
 				for (int soft=0;soft<sizeof(buffer4k)-sizeof(bin);soft++)
 				{
-					if (memcmp(buffer4k+soft,bin,sizeof(bin))==0)
+					if (!Cracked[0]&&(memcmp(buffer4k+soft,bin,sizeof(bin))==0))
 					{
 						WriteProcessMemory(hProcess,(LPVOID)(p+soft),crkbin,sizeof(crkbin),&fw);
 						if (fw==sizeof(crkbin))
 						{
-							printf("cracked succeed.\n press any key to exit.");
-							CloseHandle(hProcess);
-							getchar();
-							return 0;
+							printf("cracked1 succeed.\n");
+							Cracked[0] = TRUE;
 						}
 					}
 					if (memcmp(buffer4k+soft,crked,sizeof(crked))==0)
 					{
-						printf("The Game has already been cracked.\n\npress any key to exit.");
-						CloseHandle(hProcess);
+						printf("cracked1 succeed.\n");
+						Cracked[0] = TRUE;
+					}
+
+					if (memcmp(buffer4k + soft, bin1, sizeof(bin1)) == 0)
+					{
+						WriteProcessMemory(hProcess, (LPVOID)(p + soft), crkbin1, sizeof(crkbin1), &fw);
+						if (fw == sizeof(crkbin1))
+						{
+							printf("cracked2 succeed.\n");
+							Cracked[1] = TRUE;
+						}
+					}
+					if (memcmp(buffer4k + soft, crked1, sizeof(crked1)) == 0)
+					{
+						printf("cracked2 succeed.\n");
+						Cracked[1] = TRUE;
+					}
+
+					if (Cracked[0]&&Cracked[1])
+					{
+						printf("Hacked succeed,press any key to exit.\n");
 						getchar();
+						return 0;
 					}
 				}
 				p+=sizeof(buffer4k)-sizeof(bin);
